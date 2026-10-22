@@ -2,8 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>AWS SAA-C03 Practice</title>
+    <script>
+      try {
+        var savedUi = JSON.parse(localStorage.getItem("aws-saa-ui-v1") || "{}");
+        var narrow = window.matchMedia("(max-width: 700px)").matches;
+        var stored = narrow ? savedUi.trackerOpenMobile : savedUi.trackerOpenDesktop;
+        var listOpen = typeof stored === "boolean" ? stored : !narrow;
+        document.documentElement.classList.add(listOpen ? "tracker-open" : "tracker-closed");
+      } catch (e) {
+        document.documentElement.classList.add("tracker-open");
+      }
+    </script>
     <style>
       :root {
         --aws: #ff9900;
@@ -133,6 +144,7 @@
         padding: 20px;
         margin: 14px 0;
         box-shadow: 0 4px 16px #2132470b;
+        scroll-margin-top: 88px;
       }
 
       .qno {
@@ -220,6 +232,31 @@
         color: var(--muted);
       }
 
+      .pager {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin: 18px 0 4px;
+      }
+
+      .pager-status {
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .pager button {
+        min-width: 124px;
+        min-height: 46px;
+      }
+
+      .pager button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+
 
       .page-layout {
         max-width: 1320px;
@@ -240,16 +277,71 @@
         background: var(--card);
         border: 1px solid var(--line);
         border-radius: 14px;
-        padding: 15px;
         box-shadow: 0 4px 16px #2132470b;
         max-height: calc(100vh - 140px);
-        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
       }
-      .tracker h2 { margin: 0 0 5px; font-size: 1rem; }
-      .tracker-summary { color: var(--muted); font-size: .82rem; margin-bottom: 12px; }
+      .tracker-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 100%;
+        min-height: 52px;
+        padding: 12px 14px;
+        border: 0;
+        border-radius: 14px;
+        background: transparent;
+        color: var(--ink);
+        text-align: left;
+      }
+      .tracker-toggle-text { display: grid; gap: 2px; min-width: 0; }
+      .tracker-title { font-size: 1rem; font-weight: 800; }
+      .tracker-summary {
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 650;
+        line-height: 1.35;
+      }
+      .tracker-toggle-action {
+        flex: 0 0 auto;
+        color: #805000;
+        background: #fff6df;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.78rem;
+      }
+      .tracker-body {
+        overflow: auto;
+        padding: 0 14px 14px;
+        -webkit-overflow-scrolling: touch;
+      }
+      html.tracker-closed .tracker-body { display: none; }
+      html.tracker-closed .tracker { max-height: none; }
+      .tracker-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+      .tracker-legend span { display: inline-flex; align-items: center; gap: 5px; }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #d5deea;
+      }
+      .dot.selected { background: #e2aa32; }
+      .dot.correct { background: var(--ok); }
+      .dot.wrong { background: var(--bad); }
       .tracker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
       .tracker-item {
-        display: grid; place-items: center; min-height: 36px; padding: 4px;
+        display: grid; place-items: center; min-height: 40px; padding: 4px;
         border: 1px solid var(--line); border-radius: 8px; background: #f7f9fc;
         color: var(--ink); text-decoration: none; font-size: .8rem; font-weight: 800;
       }
@@ -268,18 +360,60 @@
         .tracker-grid { grid-template-columns: repeat(4, 1fr); }
       }
       @media (max-width: 700px) {
+        header {
+          position: static;
+          padding: 12px 14px calc(12px + env(safe-area-inset-top));
+        }
+        .brand { align-items: flex-start; }
+        h1 { font-size: 1.05rem; line-height: 1.3; }
+        .sub { display: none; }
+        .card { scroll-margin-top: 120px; }
         .controls {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 8px;
         }
-
+        #search {
+          grid-column: 1 / -1;
+          min-height: 46px;
+          font-size: 16px;
+        }
+        .page-control input,
+        button {
+          min-height: 46px;
+          font-size: 16px;
+        }
+        .page-control input { width: 64px; }
         .card {
-          padding: 16px;
+          padding: 14px;
+          margin: 10px 0;
         }
-
-        header { position: static; }
-        .page-layout { display: flex; flex-direction: column; padding: 0 12px 40px; }
-        .tracker { position: static; order: -1; width: 100%; max-height: none; margin-top: 12px; }
-        .tracker-grid { grid-template-columns: repeat(8, 1fr); }
+        .question { font-size: 1rem; }
+        .choice {
+          padding: 14px 12px;
+          align-items: flex-start;
+        }
+        .actions { flex-wrap: wrap; }
+        .actions button { flex: 1 1 140px; }
+        .page-layout {
+          display: flex;
+          flex-direction: column;
+          padding: 0 12px calc(28px + env(safe-area-inset-bottom));
+        }
+        .tracker {
+          position: sticky;
+          top: 0;
+          z-index: 4;
+          order: -1;
+          width: 100%;
+          margin-top: 12px;
+          max-height: min(70vh, 560px);
+        }
+        html.tracker-closed .tracker { max-height: none; }
+        .tracker-body { max-height: min(52vh, 420px); }
+        .tracker-grid { grid-template-columns: repeat(6, 1fr); }
+        .tracker-item { min-height: 44px; }
+        .pager { gap: 8px; }
+        .pager button { flex: 1; min-width: 0; }
       }
     </style>
   </head>
@@ -316,10 +450,29 @@
         <div class="stats" id="stats"></div>
         <main id="app"></main>
       </div>
-      <aside class="tracker" aria-label="Question progress tracker">
-        <h2>Question tracker</h2>
-        <div class="tracker-summary" id="tracker-summary"></div>
-        <nav class="tracker-grid" id="tracker-grid"></nav>
+      <aside class="tracker" id="tracker" aria-label="Question progress tracker">
+        <button
+          type="button"
+          class="tracker-toggle"
+          id="tracker-toggle"
+          aria-expanded="true"
+          aria-controls="tracker-body"
+        >
+          <span class="tracker-toggle-text">
+            <span class="tracker-title">Question list</span>
+            <span class="tracker-summary" id="tracker-summary"></span>
+          </span>
+          <span class="tracker-toggle-action" id="tracker-toggle-label">Hide</span>
+        </button>
+        <div class="tracker-body" id="tracker-body">
+          <div class="tracker-legend">
+            <span><i class="dot"></i>New</span>
+            <span><i class="dot selected"></i>Selected</span>
+            <span><i class="dot correct"></i>Correct</span>
+            <span><i class="dot wrong"></i>Wrong</span>
+          </div>
+          <nav class="tracker-grid" id="tracker-grid"></nav>
+        </div>
       </aside>
     </div>
     <script>
@@ -21282,10 +21435,59 @@
         pageCount = document.getElementById("page-count"),
         stats = document.getElementById("stats"),
         trackerGrid = document.getElementById("tracker-grid"),
-        trackerSummary = document.getElementById("tracker-summary");
+        trackerSummary = document.getElementById("tracker-summary"),
+        trackerToggle = document.getElementById("tracker-toggle"),
+        trackerToggleLabel = document.getElementById("tracker-toggle-label");
       const PAGE_SIZE = 10;
       let currentPage = 1;
       const STORAGE_KEY = "aws-saa-progress-v1";
+      const UI_KEY = "aws-saa-ui-v1";
+      const narrowScreen = () => window.matchMedia("(max-width: 700px)").matches;
+      const loadUi = () => {
+        try {
+          return JSON.parse(localStorage.getItem(UI_KEY) || "{}");
+        } catch (error) {
+          return {};
+        }
+      };
+      const uiState = loadUi();
+      let trackerOpen = document.documentElement.classList.contains("tracker-open");
+      if (Number.isFinite(uiState.page) && uiState.page >= 1) currentPage = uiState.page;
+      const saveUi = () => {
+        try {
+          const prev = loadUi();
+          const next = Object.assign({}, prev, { page: currentPage });
+          if (narrowScreen()) next.trackerOpenMobile = trackerOpen;
+          else next.trackerOpenDesktop = trackerOpen;
+          localStorage.setItem(UI_KEY, JSON.stringify(next));
+        } catch (error) {
+          // Ignore storage failures in restricted browser contexts.
+        }
+      };
+      const applyTrackerOpen = () => {
+        document.documentElement.classList.toggle("tracker-open", trackerOpen);
+        document.documentElement.classList.toggle("tracker-closed", !trackerOpen);
+        trackerToggle.setAttribute("aria-expanded", String(trackerOpen));
+        trackerToggleLabel.textContent = trackerOpen ? "Hide" : "Show";
+      };
+      const scrollToQuestion = (id) => {
+        const target = document.getElementById("q-" + id);
+        if (!target) return;
+        const bar = document.getElementById("tracker");
+        const offset = (bar ? bar.getBoundingClientRect().height : 0) + 12;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      };
+      const scrollToPageStart = () => {
+        const anchor = document.getElementById("stats");
+        if (!anchor) return;
+        const header = document.querySelector("header");
+        const bar = document.getElementById("tracker");
+        const headerHeight = header && getComputedStyle(header).position === "sticky" ? header.offsetHeight : 0;
+        const barHeight = narrowScreen() && bar ? bar.offsetHeight : 0;
+        const top = anchor.getBoundingClientRect().top + window.scrollY - headerHeight - barHeight - 8;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      };
       const loadProgress = () => {
         try {
           const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
@@ -21335,14 +21537,17 @@
       function renderTracker() {
         const counts = { correct: 0, wrong: 0, selected: 0, unanswered: 0 };
         DATA.forEach((q) => counts[statusOf(q)]++);
-        trackerSummary.textContent = `${counts.correct} correct · ${counts.wrong} incorrect · ${counts.selected} selected`;
+        const done = counts.correct + counts.wrong + counts.selected;
+        trackerSummary.textContent = `Done ${done}/${DATA.length} · ${counts.correct} correct · ${counts.wrong} wrong`;
         trackerGrid.innerHTML = DATA.map((q) => {
           const status = statusOf(q);
-          return `<a class="tracker-item ${status}" href="#q-${q.id}" data-qid="${q.id}" title="Question ${q.id}: ${status}">${q.id}</a>`;
+          const label = status === "correct" ? "correct" : status === "wrong" ? "wrong" : status === "selected" ? "selected" : "not started";
+          return `<a class="tracker-item ${status}" href="#q-${q.id}" data-qid="${q.id}" title="Question ${q.id}: ${label}" aria-label="Question ${q.id}, ${label}">${q.id}</a>`;
         }).join("");
       }
       function render() {
         saveProgress();
+        saveUi();
         const term = search.value.trim().toLowerCase();
         const list = DATA.filter((q) => !term || (q.question + " " + q.choices.map((x) => x.text).join(" ") + " " + q.explanation).toLowerCase().includes(term));
         const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
@@ -21364,7 +21569,7 @@
           }).join("");
           const answerBody = q.correctAnswers.length ? `<strong>Correct answer: ${q.correctAnswers.join(", ")}</strong><br>${esc(q.explanation)}` : `<div class="warn"><strong>Answer not detected.</strong><br>${esc(q.explanation || "No explanation available.")}</div>`;
           return `<article class="card" id="q-${q.id}"><div class="qno">Question ${q.id}${q.correctAnswers.length > 1 ? " · Select " + q.correctAnswers.length : ""}</div><div class="question">${esc(q.question)}</div><div class="choices">${choices}</div><div class="actions"><button class="primary reveal" data-id="${q.id}">${s.revealed ? "Answer revealed" : "Reveal answer"}</button><button class="ghost hide" data-id="${q.id}">Hide</button></div><div class="answer ${s.revealed ? "show" : ""}" id="a-${q.id}">${answerBody}</div></article>`;
-        }).join("") : '<div class="empty">No matching questions.</div>';
+        }).join("") + `<nav class="pager" aria-label="Pagination"><button type="button" class="ghost pager-prev" ${currentPage <= 1 ? "disabled" : ""}>Previous</button><span class="pager-status">Page ${currentPage} of ${totalPages}</span><button type="button" class="primary pager-next" ${currentPage >= totalPages ? "disabled" : ""}>Next</button></nav>` : '<div class="empty">No matching questions.</div>';
         renderTracker();
       }
       app.addEventListener("change", (e) => {
@@ -21379,6 +21584,14 @@
         if (target) target.scrollIntoView({ block: 'nearest' });
       });
       app.addEventListener("click", (e) => {
+        const pageBtn = e.target.closest(".pager-prev, .pager-next");
+        if (pageBtn) {
+          if (pageBtn.disabled) return;
+          currentPage += pageBtn.classList.contains("pager-next") ? 1 : -1;
+          render();
+          scrollToPageStart();
+          return;
+        }
         const b = e.target.closest("button[data-id]");
         if (!b) return;
         const id = +b.dataset.id, s = getState(id);
@@ -21390,6 +21603,7 @@
       trackerGrid.addEventListener("click", (e) => {
         const link = e.target.closest("a[data-qid]");
         if (!link) return;
+        e.preventDefault();
         const id = +link.dataset.qid;
         const questionIndex = DATA.findIndex((q) => q.id === id);
         if (search.value || !document.getElementById("q-" + id)) {
@@ -21397,10 +21611,23 @@
           currentPage = Math.floor(questionIndex / PAGE_SIZE) + 1;
           render();
         }
-        requestAnimationFrame(() => {
-          const target = document.getElementById("q-" + id);
-          if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
-        });
+        if (narrowScreen()) {
+          trackerOpen = false;
+          applyTrackerOpen();
+          saveUi();
+        }
+        requestAnimationFrame(() => scrollToQuestion(id));
+      });
+      trackerToggle.addEventListener("click", () => {
+        trackerOpen = !trackerOpen;
+        applyTrackerOpen();
+        saveUi();
+      });
+      window.matchMedia("(max-width: 700px)").addEventListener("change", (event) => {
+        const saved = loadUi();
+        const stored = event.matches ? saved.trackerOpenMobile : saved.trackerOpenDesktop;
+        trackerOpen = typeof stored === "boolean" ? stored : !event.matches;
+        applyTrackerOpen();
       });
       search.addEventListener("input", () => {
         currentPage = 1;
@@ -21413,12 +21640,12 @@
       document.getElementById("random").addEventListener("click", () => {
         search.value = "";
         const randomIndex = Math.floor(Math.random() * DATA.length);
+        const q = DATA[randomIndex];
         currentPage = Math.floor(randomIndex / PAGE_SIZE) + 1;
         render();
-        const q = DATA[randomIndex];
-        const target = document.getElementById("q-" + q.id);
-        if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
+        scrollToQuestion(q.id);
       });
+      applyTrackerOpen();
       render();
     </script>
   </body>
